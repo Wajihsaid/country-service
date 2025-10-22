@@ -4,13 +4,13 @@ pipeline {
     environment {
         MAVEN_HOME = "/usr/share/maven"
         JAVA_HOME = "/usr/lib/jvm/java-21-openjdk-amd64"
-        DEPLOY_PATH = "/var/lib/tomcat10/webapps"
+        DEPLOY_PATH = "/opt/country-service"  // chemin où tu veux exécuter le jar
+        JAR_NAME = "country-service-1.0-SNAPSHOT.jar"  // nom exact du jar généré
     }
 
     stages {
         stage('Checkout') {
             steps {
-                echo "🔄 Récupération du code source..."
                 git branch: 'main', url: 'https://github.com/Wajihsaid/country-service.git'
             }
         }
@@ -31,26 +31,22 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo "🚀 Déploiement sur Tomcat10..."
-                
-                // Arrêter Tomcat (ignore erreur si déjà arrêté)
-                sh 'sudo systemctl stop tomcat10 || true'
-                
-                // Copier le .war généré dans le dossier webapps
-                sh "cp target/*.war ${DEPLOY_PATH}/"
-    
-                
-                // Redémarrer Tomcat
-                sh 'sudo systemctl start tomcat10'
-                
-                echo "✅ Déploiement terminé."
+                echo "🚀 Déploiement du jar..."
+                // Créer le dossier de déploiement si inexistant
+                sh "mkdir -p ${DEPLOY_PATH}"
+                // Copier le jar généré
+                sh "cp target/${JAR_NAME} ${DEPLOY_PATH}/app.jar"
+                // Stop l'ancien jar si en cours d'exécution
+                sh "pkill -f 'java -jar ${DEPLOY_PATH}/app.jar' || true"
+                // Démarrer le nouveau jar en arrière-plan
+                sh "nohup java -jar ${DEPLOY_PATH}/app.jar > ${DEPLOY_PATH}/app.log 2>&1 &"
             }
         }
     }
 
     post {
         success {
-            echo "🎉 Pipeline terminé avec succès !"
+            echo "✅ Déploiement réussi !"
         }
         failure {
             echo "❌ Le pipeline a échoué."
