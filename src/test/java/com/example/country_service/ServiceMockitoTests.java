@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 //@SpringBootTest(classes= {ServiceMockitoTests.class})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-
+@ActiveProfiles("test")
 public class ServiceMockitoTests {
 
     @Mock
@@ -100,6 +100,7 @@ public class ServiceMockitoTests {
         verify(countryrep,times(1)).delete(country);
 
     }
+
 
 
 }
