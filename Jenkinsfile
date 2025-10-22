@@ -4,8 +4,7 @@ pipeline {
     environment {
         MAVEN_HOME = "/usr/share/maven"
         JAVA_HOME = "/usr/lib/jvm/java-21-openjdk-amd64"
-        DEPLOY_PATH = "/opt/country-service"  // chemin où tu veux exécuter le jar
-        JAR_NAME = "country-service-1.0-SNAPSHOT.jar"  // nom exact du jar généré
+        DEPLOY_PATH = "/var/lib/tomcat10/webapps"  // Tomcat10 webapps
     }
 
     stages {
@@ -18,7 +17,8 @@ pipeline {
         stage('Build') {
             steps {
                 echo "🧱 Compilation du projet..."
-                sh "${MAVEN_HOME}/bin/mvn clean package -DskipTests"
+                // Ici on demande Maven de produire un WAR
+                sh "${MAVEN_HOME}/bin/mvn clean package -DskipTests -Pwar"
             }
         }
 
@@ -31,15 +31,13 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo "🚀 Déploiement du jar..."
-                // Créer le dossier de déploiement si inexistant
-                sh "mkdir -p ${DEPLOY_PATH}"
-                // Copier le jar généré
-                sh "cp target/${JAR_NAME} ${DEPLOY_PATH}/app.jar"
-                // Stop l'ancien jar si en cours d'exécution
-                sh "pkill -f 'java -jar ${DEPLOY_PATH}/app.jar' || true"
-                // Démarrer le nouveau jar en arrière-plan
-                sh "nohup java -jar ${DEPLOY_PATH}/app.jar > ${DEPLOY_PATH}/app.log 2>&1 &"
+                echo "🚀 Déploiement sur Tomcat10..."
+                // Arrêter Tomcat
+                sh "sudo systemctl stop tomcat10"
+                // Copier le WAR dans webapps
+                sh "cp target/*.war ${DEPLOY_PATH}/"
+                // Démarrer Tomcat
+                sh "sudo systemctl start tomcat10"
             }
         }
     }
