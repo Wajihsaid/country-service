@@ -11,6 +11,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/Wajihsaid/country-service.git'
+            }
         }
 
         stage('Build') {
