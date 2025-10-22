@@ -37,7 +37,8 @@ pipeline {
                 sh 'sudo systemctl stop tomcat10 || true'
                 
                 // Copier le .war généré dans le dossier webapps
-                sh "cp target/country-service.war ${DEPLOY_PATH}/"
+                sh "cp target/*.war ${DEPLOY_PATH}/"
+    
                 
                 // Redémarrer Tomcat
                 sh 'sudo systemctl start tomcat10'
