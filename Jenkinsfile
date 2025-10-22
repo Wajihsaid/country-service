@@ -10,8 +10,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/<TON_USER>/country-service.git'
-            }
+                git branch: 'main', url: 'https://github.com/Wajihsaid/country-service.git
         }
 
         stage('Build') {
