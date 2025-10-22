@@ -4,12 +4,13 @@ pipeline {
     environment {
         MAVEN_HOME = "/usr/share/maven"
         JAVA_HOME = "/usr/lib/jvm/java-21-openjdk-amd64"
-        DEPLOY_PATH = "/var/lib/tomcat9/webapps"
+        DEPLOY_PATH = "/var/lib/tomcat10/webapps"
     }
 
     stages {
         stage('Checkout') {
             steps {
+                echo "🔄 Récupération du code source..."
                 git branch: 'main', url: 'https://github.com/Wajihsaid/country-service.git'
             }
         }
@@ -30,19 +31,25 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo "🚀 Déploiement sur Tomcat..."
-                sh """
-                    sudo systemctl stop tomcat9
-                    sudo cp target/*.war ${DEPLOY_PATH}/country-service.war
-                    sudo systemctl start tomcat9
-                """
+                echo "🚀 Déploiement sur Tomcat10..."
+                
+                // Arrêter Tomcat (ignore erreur si déjà arrêté)
+                sh 'sudo systemctl stop tomcat10 || true'
+                
+                // Copier le .war généré dans le dossier webapps
+                sh "cp target/country-service.war ${DEPLOY_PATH}/"
+                
+                // Redémarrer Tomcat
+                sh 'sudo systemctl start tomcat10'
+                
+                echo "✅ Déploiement terminé."
             }
         }
     }
 
     post {
         success {
-            echo "✅ Déploiement réussi !"
+            echo "🎉 Pipeline terminé avec succès !"
         }
         failure {
             echo "❌ Le pipeline a échoué."
