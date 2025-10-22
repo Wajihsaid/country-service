@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         MAVEN_HOME = "/usr/share/maven"
-        JAVA_HOME = "/usr/lib/jvm/java-17-openjdk-amd64"
+        JAVA_HOME = "/usr/lib/jvm/java-21-openjdk-amd64"
         DEPLOY_PATH = "/var/lib/tomcat9/webapps"
     }
 
