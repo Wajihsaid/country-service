@@ -25,7 +25,9 @@ pipeline {
 
                         // Se connecte à Docker Hub en utilisant les credentials que vous venez de configurer
                         withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd')]) {
-                            sh "docker login -u wajihsaid -p ${dockerhubpwd}"
+                            sh "docker login -u wajihsaid -p ${withCredentials([string(credentialsId: 'ab9e88bd-8ef5-42f2-8989-3a15e1b35aac', variable: 'dockerhub-pwd')]) {
+    // some block
+}}"
                         }
 
                         // Pousse l'image vers votre dépôt Docker Hub
