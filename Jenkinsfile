@@ -1,53 +1,52 @@
 pipeline {
     agent any
 
-    environment {
-        MAVEN_HOME = "/usr/share/maven"
-        JAVA_HOME = "/usr/lib/jvm/java-21-openjdk-amd64"
-        DEPLOY_PATH = "/var/lib/tomcat10/webapps"  // Tomcat10 webapps
+    tools {
+        maven 'M2_HOME'
+        jdk 'JDK21'
     }
-
     stages {
-        stage('Checkout') {
+
+        stage('Compile, test code and package') {
             steps {
-                git branch: 'main', url: 'https://github.com/Wajihsaid/country-service.git'
+                sh 'mvn clean install'
+            }
+            post {
+                success {
+                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+                }
             }
         }
+        stage('Build and Push Docker Image') {
+                    steps {
+                        // Construit l'image Docker. Le "." indique que le Dockerfile est dans le répertoire courant.
+                        // Le tag de l'image est le numéro du build Jenkins (ex: my-country-service:1, my-country-service:2, etc.)
+                        sh "docker build -t wajihsaid/my-country-service:${env.BUILD_NUMBER} ."
 
-        stage('Build') {
-            steps {
-                echo "🧱 Compilation du projet..."
-                // Ici on demande Maven de produire un WAR
-                sh "${MAVEN_HOME}/bin/mvn clean package -DskipTests -Pwar"
-            }
-        }
+                        // Se connecte à Docker Hub en utilisant les credentials que vous venez de configurer
+                        withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd')]) {
+                            sh "docker login -u wajihsaid -p ${dockerhubpwd}"
+                        }
 
-        stage('Test') {
-            steps {
-                echo "🧪 Exécution des tests..."
-                sh "${MAVEN_HOME}/bin/mvn test"
-            }
-        }
+                        // Pousse l'image vers votre dépôt Docker Hub
+                        sh "docker push wajihsaid/my-country-service:${env.BUILD_NUMBER}"
+                    }
+                }
 
-        stage('Deploy') {
-            steps {
-                echo "🚀 Déploiement sur Tomcat10..."
-                // Arrêter Tomcat
-                sh "sudo systemctl stop tomcat10"
-                // Copier le WAR dans webapps
-                sh "cp target/*.war ${DEPLOY_PATH}/"
-                // Démarrer Tomcat
-                sh "sudo systemctl start tomcat10"
-            }
+                stage('Deploy Microservice') {
+                    steps {
+                        // Cette approche est simple mais brutale : elle arrête et supprime le conteneur précédent s'il existe.
+                        // L'option -f force la suppression même si le conteneur est en cours d'exécution.
+                        // '|| true' est une astuce pour que la commande n'échoue pas si aucun conteneur n'existe.
+                        sh 'docker stop my-app || true && docker rm my-app || true'
+
+                        // Lance un nouveau conteneur avec la nouvelle image
+                        // -d : mode détaché (le conteneur tourne en arrière-plan)
+                        // -p 8087:8087 : mappe le port 8087 de l'hôte au port 8087 du conteneur
+                        // --name my-app : donne un nom fixe au conteneur pour le retrouver facilement
+                        sh "docker run -d -p 8087:8087 --name my-app wajihsaid/my-country-service:${env.BUILD_NUMBER}"
+                    }
+                }
         }
     }
 
-    post {
-        success {
-            echo "✅ Déploiement réussi !"
-        }
-        failure {
-            echo "❌ Le pipeline a échoué."
-        }
-    }
-}
