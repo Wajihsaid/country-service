@@ -37,7 +37,7 @@
     - name: Apply Kubernetes Deployment
       kubernetes.core.k8s:
         state: present
-        src: deployment.yaml
+        src: my-deployment.yaml
         kubeconfig: "{{ kubeconfig_path }}"
 
     - name: Apply Kubernetes Service
