@@ -3,12 +3,15 @@
   hosts: localhost
   connection: local
   gather_facts: no
-  vars_files:
-    - vault.yml
+
   vars:
     image_name: my-country-service
     image_tag: v1
     dockerfile_path: '.'
+    # Remplacez par votre nom d'utilisateur Docker Hub
+    docker_registry_username: 'wajisaid'
+    # !! A NE PAS FAIRE EN PRODUCTION : Utilisez Ansible Vault ou les credentials Jenkins
+    docker_registry_password: '2722148801'
     kubeconfig_path: './config' # Chemin vers votre fichier kubeconfig
 
   tasks:
