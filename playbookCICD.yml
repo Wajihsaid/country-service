@@ -7,7 +7,7 @@
   vars:
     image_name: my-country-service
     image_tag: v1
-    dockerfile_path: '.'
+    dockerfile_path: './'
     # Remplacez par votre nom d'utilisateur Docker Hub
     docker_registry_username: 'wajisaid'
     # !! A NE PAS FAIRE EN PRODUCTION : Utilisez Ansible Vault ou les credentials Jenkins
