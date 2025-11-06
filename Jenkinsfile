@@ -17,23 +17,25 @@ pipeline {
 
         stage('Deploy using Ansible Playbook') {
             steps {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-pwd', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                                script {
+                                    // Définir les identifiants directement dans le script
+                                    def dockerUser = "wajisaid"
+                                    // REMPLACEZ CECI PAR VOTRE VRAI MOT DE PASSE OU JETON D'ACCÈS
+                                    def dockerPass = "11b87ba877cd3d05a2a29de334c1e6f6b6"
 
-                        // --- ÉTAPE DE DÉBOGAGE ---
-                        // Affiche l'utilisateur pour vérifier qu'il est correct.
-                        // Le mot de passe ne sera pas affiché dans la console pour des raisons de sécurité (il sera masqué par Jenkins).
-                        sh 'echo "Débogage Jenkins: Utilisateur Docker = $DOCKER_USER"'
-                        // -------------------------
+                                    // --- ÉTAPE DE DÉBOGAGE ---
+                                    // Affiche l'utilisateur pour vérifier qu'il est correct.
+                                    sh "echo 'Débogage Jenkins: Utilisateur Docker = ${dockerUser}'"
+                                    // -------------------------
 
-                        script {
-                            ansiblePlaybook(
-                                playbook: 'playbookCICD.yml',
-                                installation: 'myansible',
-                                extras: "-e 'docker_registry_username=${env.DOCKER_USER}' -e 'docker_registry_password=${env.DOCKER_PASS}'"
-                            )
-                        }
-                    }
-                }
+                                    ansiblePlaybook(
+                                        playbook: 'playbookCICD.yml',
+                                        installation: 'myansible',
+                                        // Passer les identifiants au playbook comme variables supplémentaires
+                                        extras: "-e 'docker_registry_username=${dockerUser}' -e 'docker_registry_password=${dockerPass}'"
+                                    )
+                                }
+                            }
         }
     }
 
