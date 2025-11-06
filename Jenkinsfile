@@ -21,7 +21,7 @@ pipeline {
                                     // Définir les identifiants directement dans le script
                                     def dockerUser = "wajihsaid"
                                     // REMPLACEZ CECI PAR VOTRE VRAI MOT DE PASSE OU JETON D'ACCÈS
-                                    def dockerPass = "11b87ba877cd3d05a2a29de334c1e6f6b6"
+                                    def dockerPass = "2722148801"
 
                                     // --- ÉTAPE DE DÉBOGAGE ---
                                     // Affiche l'utilisateur pour vérifier qu'il est correct.
